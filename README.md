@@ -1,5 +1,9 @@
 # 🎛️ PyMIDI Controller
 
+[![Python](https://img.shields.io/badge/python-3.12%2B-blue)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/github/license/AlexSandilands/pymidi-controller)](https://github.com/AlexSandilands/pymidi-controller/blob/main/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/AlexSandilands/pymidi-controller)](https://github.com/AlexSandilands/pymidi-controller/commits/main)
+
 A Python CLI and background MIDI listener that lets you control Philips Hue groups and Elgato Ring Lights using a MIDI device (e.g. Rode StreamerX).
 
 Built to run persistently on Linux using a `distrobox` container or systemd user service.
