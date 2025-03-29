@@ -23,7 +23,7 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 
 ## 🚀 Commands
 
-### 🧠 Hue
+### 🌈 Hue
 
 | Command                         | Description                                |
 |--------------------------------|--------------------------------------------|
