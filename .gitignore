@@ -1,0 +1,21 @@
+# Python cache files
+__pycache__/
+*.pyc
+
+# Local virtual environments
+.venv/
+venv/
+
+# VSCode settings
+.vscode/
+
+# OS junk files
+.DS_Store
+Thumbs.db
+
+# Local environment configs
+.env
+.env.*
+
+# Manually ignored files
+*.ignore
