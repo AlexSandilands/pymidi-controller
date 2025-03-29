@@ -23,6 +23,7 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 - [🚀 Background Service Setup (Optional)](#-background-service-setup-optional-recommended)
 - [📂 Project Structure](#-project-structure)
 - [✅ Requirements](#-requirements)
+- [📋 TODO](#-todo)
 
 ---
 
@@ -333,3 +334,12 @@ Install dependencies with:
 ```bash
 pip install -r requirements.txt
 ```
+
+## 📋 TODO
+
+- 🎚️ Adding a GUI or system tray app
+- ✈️ Adding application launcher commands
+- 🔄 Adding OBS scene switching commands
+- 🐍 Publishing to PyPI
+- 🧪 Adding tests / GitHub Actions
+- 📦 Turning this into a plug-and-play installer
