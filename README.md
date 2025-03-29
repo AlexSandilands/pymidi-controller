@@ -23,6 +23,7 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 - [🚀 Background Service Setup (Optional)](#-background-service-setup-optional-recommended)
 - [📂 Project Structure](#-project-structure)
 - [✅ Requirements](#-requirements)
+- [📋 TODO](#-todo)
 
 ---
 
