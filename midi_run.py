@@ -10,6 +10,7 @@ from mido import open_input
 from actions.midi_utils import get_known_midi_input
 
 BINDINGS_PATH = Path(__file__).resolve().parent / "midi_bindings.json"
+CLI_PATH = Path(__file__).resolve().parent / "cli.py"
 
 def format_midi_key(msg):
     if msg.type == "control_change":
@@ -24,7 +25,7 @@ def handle_midi_message(msg, bindings):
         command = bindings[key]
         print(f"🎯 Matched {key} → Running: python3 cli.py {' '.join(command)}")
         try:
-            subprocess.Popen(["python3", "cli.py"] + command)
+            subprocess.Popen(["python3", str(CLI_PATH)] + command)
         except Exception as e:
             print(f"❌ Failed to run command: {e}")
     elif key:
