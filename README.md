@@ -240,7 +240,7 @@ Create this file:
 
 ```bash
 mkdir -p ~/.config/systemd/user
-nano ~/.config/systemd/user/pymidi.service
+vim ~/.config/systemd/user/pymidi.service
 ```
 
 Paste the following:

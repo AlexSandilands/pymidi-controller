@@ -26,31 +26,50 @@ install:
 	mkdir -p $(INSTALL_DIR)/user_settings
 
 	@echo "📄 Copying default user_settings files if missing..."
-	@for file in user_settings/*; do \
-		filename=$$(basename $$file); \
-		if [ ! -f $(INSTALL_DIR)/user_settings/$$filename ]; then \
-			echo " → $$filename"; \
-			cp $$file $(INSTALL_DIR)/user_settings/$$filename; \
-		fi \
+	@for file in user_settings/* user_settings/.*; do \
+		if [ -f $$file ]; then \
+			filename=$$(basename $$file); \
+			if [ ! -f $(INSTALL_DIR)/user_settings/$$filename ]; then \
+				echo " → $$filename"; \
+				cp $$file $(INSTALL_DIR)/user_settings/$$filename; \
+			fi; \
+		fi; \
 	done
 
 	@echo "✅ Installed to $(INSTALL_DIR)"
 
 
 deploy: install
-	@echo "🚀 Restarting pymidi.service if it exists..."
+	@echo "🚀 Reloading and deploying systemd user service..."
 	@systemctl --user daemon-reload
-	@if systemctl --user list-units --type=service | grep -q pymidi.service; then \
-		systemctl --user restart pymidi.service; \
-		echo "✅ Service restarted."; \
+
+	@if systemctl --user list-unit-files | grep -q 'pymidi.service'; then \
+		if systemctl --user is-active --quiet pymidi.service; then \
+			echo "🔁 Service is active — restarting..."; \
+			systemctl --user restart pymidi.service; \
+		else \
+			echo "▶️  Service found but inactive — starting..."; \
+			systemctl --user start pymidi.service; \
+		fi; \
+		if ! systemctl --user is-enabled --quiet pymidi.service; then \
+			echo "📌 Service is not enabled — enabling for auto-start at login..."; \
+			systemctl --user enable pymidi.service; \
+		fi; \
+		echo "✅ Service is running and enabled."; \
 	else \
-		echo "⚠️  Service not found. You may need to enable it manually."; \
+		echo "⚠️  Service not found. You may need to create ~/.config/systemd/user/pymidi.service"; \
 	fi
 
 clean:
+	@echo "🛑 Stopping service (if running)..."
+	@systemctl --user stop pymidi.service || true
+
 	@echo "🧹 Cleaning runtime install..."
 	rm -rf $(INSTALL_DIR)
 	@echo "✅ Removed $(INSTALL_DIR)"
+
+status:
+	@systemctl --user status pymidi.service
 
 run-dev:
 	@echo "🚀 Running in dev mode (interactive)..."
