@@ -338,6 +338,8 @@ pip install -r requirements.txt
 ## 📋 TODO
 
 - 🎚️ Adding a GUI or system tray app
+- ✈️ Adding application launcher commands
+- 🔄 Adding OBS scene switching commands
 - 🐍 Publishing to PyPI
 - 🧪 Adding tests / GitHub Actions
 - 📦 Turning this into a plug-and-play installer
