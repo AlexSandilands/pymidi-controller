@@ -1,7 +1,16 @@
-# Target install directory
 INSTALL_DIR := ~/.local/share/pymidi-controller
 
-.PHONY: install update clean run-dev deploy
+.PHONY: setup install deploy clean listen run-dev
+
+setup:
+	@echo "🔧 Running configuration setup..."
+	python3 cli.py hue-discover || true
+	python3 cli.py elgato-discover || true
+	@echo "🎛️ You can now run 'make listen' to configure MIDI mappings."
+
+listen:
+	@echo "🎹 Starting interactive MIDI listener..."
+	python3 midi_listener.py
 
 install:
 	@echo "📦 Installing to $(INSTALL_DIR)..."
@@ -24,15 +33,17 @@ install:
 		cp .env $(INSTALL_DIR)/.env; \
 	fi
 
-	@echo "✅ Installed without overwriting user data."
-
-update: install
-	@echo "🔄 Updated runtime install."
+	@echo "✅ Installed to $(INSTALL_DIR)"
 
 deploy: install
-	@echo "🚀 Restarting pymidi.service..."
-	systemctl --user restart pymidi.service
-	@echo "✅ Deployed + restarted service."
+	@echo "🚀 Restarting pymidi.service if it exists..."
+	@systemctl --user daemon-reload
+	@if systemctl --user list-units --type=service | grep -q pymidi.service; then \
+		systemctl --user restart pymidi.service; \
+		echo "✅ Service restarted."; \
+	else \
+		echo "⚠️  Service not found. You may need to enable it manually."; \
+	fi
 
 clean:
 	@echo "🧹 Cleaning runtime install..."

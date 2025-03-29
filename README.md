@@ -147,14 +147,97 @@ It will auto-select the first known device found in `mido.get_input_names()`.
 
 ---
 
-## 🛠 Running as a Startup Service
+## 🚀 Background Service Setup (Optional, Recommended)
 
-Coming soon — you can run `midi_run.py` on boot using:
+To make PyMIDI start automatically at login and listen in the background, you can set up a `systemd` user service.
 
-- `.desktop` autostart launcher
-- `systemd --user` unit (recommended for persistent background use)
+This step is **optional**, but highly recommended for full automation.
 
 ---
+
+### 🐧 Step 1: (Optional) Create a Distrobox Container
+
+If you're using an **immutable distro** (like Bazzite or Fedora Silverblue), you’ll want to run PyMIDI inside a containerized development environment:
+
+```bash
+distrobox create --name pymidi --image fedora:latest
+distrobox enter pymidi
+```
+
+Inside the container:
+
+```bash
+# Optional: install dependencies
+sudo dnf install python3 git gcc alsa-lib-devel
+
+# Clone or mount your repo, or use `make install` from host after setting up the config (make setup, make listen)
+```
+
+PyMIDI will run from this container when the system service starts.
+
+---
+
+### 🔧 Step 2: Create the systemd User Service
+
+Create this file:
+
+```bash
+mkdir -p ~/.config/systemd/user
+nano ~/.config/systemd/user/pymidi.service
+```
+
+Paste the following:
+
+```ini
+[Unit]
+Description=🎛️ PyMIDI Listener (via Distrobox)
+After=graphical.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/distrobox enter pymidi -- /usr/bin/python3 /home/YOUR_USERNAME/.local/share/pymidi-controller/midi_run.py --mode blocking
+Restart=on-failure
+Environment=DISPLAY=:0
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target
+```
+
+> 📝 Replace `/home/YOUR_USERNAME/...` with your actual home directory path.
+
+---
+
+### ✅ Step 3: Enable and Start the Service
+
+Run the following from your **host terminal**:
+
+```bash
+systemctl --user daemon-reexec
+systemctl --user daemon-reload
+systemctl --user enable --now pymidi.service
+```
+
+Check status:
+
+```bash
+systemctl --user status pymidi.service
+```
+
+---
+
+### 🧠 Optional: Enable Linger (Start Without Logging In)
+
+If you want the MIDI service to run even before you've logged in to your desktop:
+
+```bash
+loginctl enable-linger $USER
+```
+
+This ensures your `systemd --user` services start at system boot.
+
 
 ## 📂 Project Structure
 
