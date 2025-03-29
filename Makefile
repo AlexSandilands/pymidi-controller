@@ -19,21 +19,23 @@ install:
 		--exclude '.git' \
 		--exclude '__pycache__' \
 		--exclude '*.pyc' \
-		--exclude 'midi_bindings.json' \
-		--exclude '.env' \
+		--exclude 'user_settings' \
 		./ $(INSTALL_DIR)
 
-	@if [ ! -f $(INSTALL_DIR)/midi_bindings.json ]; then \
-		echo "📄 Copying default midi_bindings.json..."; \
-		cp midi_bindings.json $(INSTALL_DIR)/midi_bindings.json; \
-	fi
+	@echo "📁 Ensuring user_settings/ exists in install dir..."
+	mkdir -p $(INSTALL_DIR)/user_settings
 
-	@if [ ! -f $(INSTALL_DIR)/.env ]; then \
-		echo "🔐 Copying default .env..."; \
-		cp .env $(INSTALL_DIR)/.env; \
-	fi
+	@echo "📄 Copying default user_settings files if missing..."
+	@for file in user_settings/*; do \
+		filename=$$(basename $$file); \
+		if [ ! -f $(INSTALL_DIR)/user_settings/$$filename ]; then \
+			echo " → $$filename"; \
+			cp $$file $(INSTALL_DIR)/user_settings/$$filename; \
+		fi \
+	done
 
 	@echo "✅ Installed to $(INSTALL_DIR)"
+
 
 deploy: install
 	@echo "🚀 Restarting pymidi.service if it exists..."
@@ -52,4 +54,4 @@ clean:
 
 run-dev:
 	@echo "🚀 Running in dev mode (interactive)..."
-	python3 midi_run.py --mode interactive
+	python3 pymidi.py --mode interactive

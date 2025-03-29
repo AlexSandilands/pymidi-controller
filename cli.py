@@ -1,5 +1,6 @@
 import argparse
-from actions import hue, hue_discovery, elgato, elgato_discovery, midi_utils
+from actions import hue, hue_discovery, elgato, elgato_discovery
+from utils import midi_utils
 
 def main():
     parser = argparse.ArgumentParser(description="Python MIDI :: Hue + Elgato Control CLI")
@@ -39,8 +40,11 @@ def main():
     colorloop.add_argument("group", help="Hue group name")
     colorloop.add_argument("--effect", default="", help="Set a specific effect (colorloop, none)")
 
-    color_toggle = subparsers.add_parser("hue-group-toggle-color", help="Toggle a group's color between red and blue")
+    color_toggle = subparsers.add_parser("hue-group-toggle-redblue", help="Toggle a group's color between red and blue")
     color_toggle.add_argument("group", help="Hue group name")
+
+    color_cycle = subparsers.add_parser("hue-group-color-cycle", help="Cycles a group's color through the colors provided in user_settings/color_cycles.json")
+    color_cycle.add_argument("group", help="Hue group name")
 
     # ----------------------------------------------------------------
     # ELGATO: Discovery + Controls
@@ -66,14 +70,16 @@ def main():
     # Hue group controls
     elif args.command == "hue-group-toggle":
         hue.toggle_group(args.group)
+    elif args.command == "hue-group-toggle-redblue":
+        hue.toggle_red_blue(args.group)
     elif args.command == "hue-group-color":
         try:
             hue_val = int(args.color)
         except ValueError:
             hue_val = args.color
         hue.set_group_color(args.group, hue_val, args.sat, args.bri)
-    elif args.command == "hue-group-toggle-color":
-        hue.toggle_group_color(args.group)
+    elif args.command == "hue-group-color-cycle":
+        hue.cycle_group_color(args.group)
 
     # Hue info
     elif args.command == "hue-groups-info":

@@ -1,14 +1,7 @@
 import requests
 import time
-from pathlib import Path
-from dotenv import load_dotenv, set_key
-
-# -------------------------------------------------------------------
-# 📦 Environment Setup
-# -------------------------------------------------------------------
-
-ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(ENV_PATH)
+from config import ENV_FILE
+from dotenv import set_key
 
 # -------------------------------------------------------------------
 # 🌐 Hue Bridge Discovery & API Key Creation
@@ -68,8 +61,8 @@ def save_to_env(ip, api_key):
 
     save = input("\n💾 Save this info to your .env file? [y/N] ").strip().lower()
     if save == "y":
-        set_key(str(ENV_PATH), "HUE_BRIDGE_IP", ip)
-        set_key(str(ENV_PATH), "HUE_API_KEY", api_key)
+        set_key(str(ENV_FILE), "HUE_BRIDGE_IP", ip)
+        set_key(str(ENV_FILE), "HUE_API_KEY", api_key)
         print(f"✅ Saved to .env:\n  HUE_BRIDGE_IP={ip}\n  HUE_API_KEY={api_key}")
     else:
         print("⚠️ Skipped saving to .env. You can manually add these later.")

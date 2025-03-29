@@ -10,6 +10,22 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 
 ---
 
+## 📚 Table of Contents
+
+- [📦 Features](#-features)
+- [🚀 Commands](#-commands)
+  - [🌈 Hue](#-hue)
+  - [💡 Elgato](#-elgato)
+  - [🎹 MIDI](#-midi)
+- [🧑‍💻 User Settings](#-user-settings)
+- [🎛️ MIDI Mapping](#️-midi-mapping)
+- [🔐 Environment Setup (.env)](#-environment-setup-env)
+- [🚀 Background Service Setup (Optional)](#-background-service-setup-optional-recommended)
+- [📂 Project Structure](#-project-structure)
+- [✅ Requirements](#-requirements)
+
+---
+
 ## 📦 Features
 
 - 🔆 Control **Hue groups**: toggle, color set, effect, schedule
@@ -25,17 +41,18 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 
 ### 🌈 Hue
 
-| Command                         | Description                                |
-|--------------------------------|--------------------------------------------|
-| `hue-discover`                 | Discover Hue Bridge and pair to get API key |
-| `hue-groups-info`              | List all groups and their states           |
-| `hue-group-toggle <group>`     | Toggle a group on/off                      |
-| `hue-group-color <group> <color>` | Set color using name or hue value       |
-| `hue-group-toggle-color <group>` | Toggle a group between red and blue    |
-| `hue-lights-info`              | List all individual lights and effects     |
-| `hue-schedules-info`           | List all schedules                         |
-| `hue-schedule-toggle <name>`   | Toggle a schedule on/off                   |
-| `hue-colorloop-toggle <group>` | Toggle colorloop effect                    |
+| Command                            | Description                                    |
+|------------------------------------|------------------------------------------------|
+| `hue-discover`                     | Discover Hue Bridge and pair to get API key    |
+| `hue-groups-info`                  | List all groups and their states               |
+| `hue-group-color <group> <color>`  | Set color using name or hue value              |
+| `hue-group-color-cycle <group>`    | Cycles a group color between configured colors |
+| `hue-group-toggle <group>`         | Toggle a group on/off                          |
+| `hue-group-toggle-redblue <group>` | Toggle a group between red and blue            |
+| `hue-lights-info`                  | List all individual lights and effects         |
+| `hue-schedules-info`               | List all schedules                             |
+| `hue-schedule-toggle <name>`       | Toggle a schedule on/off                       |
+| `hue-colorloop-toggle <group>`     | Toggle colorloop effect                        |
 
 ---
 
@@ -51,10 +68,68 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 
 ### 🎹 MIDI
 
-| Command                    | Description                                     |
-|----------------------------|-------------------------------------------------|
-| `midi-listen`              | Print incoming MIDI events (for manual mapping) |
-| `midi-run [--mode MODE]`   | Start MIDI listener (`interactive` or `blocking`) |
+| Command                    | Description                                        |
+|----------------------------|----------------------------------------------------|
+| `midi-listen`              | Print incoming MIDI events (for manual mapping)    |
+| `midi-run [--mode MODE]`   | Start MIDI listener (`interactive` or `blocking`)  |
+
+---
+
+## 🧑‍💻 User Settings
+
+All user-specific configuration files are stored in the `user_settings/` folder. These define how your MIDI device behaves, what colors to cycle through, and how devices are identified.
+
+You can safely version or ignore these files. Here's what each one does:
+
+---
+
+### 🎨 `color_cycles.json`
+
+Used by `hue-group-color-cycle` to define the color loop for each group:
+
+```json
+{
+  "YOUR GROUP": ["red", "blue", "green", "purple"],
+}
+```
+
+If a group is missing from this file, it will default to: `["red", "blue"]`.
+
+---
+
+### 🎚 `midi_bindings.json`
+
+Defines what each MIDI control triggers.  
+See [🎛️ MIDI Mapping](#️-midi-mapping) for how to generate these values.
+
+```json
+{
+  "control_change:0:1:127": ["hue-group-toggle", "YOUR GROUP"],
+  "control_change:0:2:127": ["hue-group-cycle-color", "YOUR GROUP"],
+  "control_change:0:3:127": ["elgato-toggle"]
+}
+```
+
+Each array is a CLI command split into arguments, e.g. `["command", "arg1", "arg2"]`.
+
+---
+
+### 🎛 `midi_devices.json`
+
+Used to define known MIDI device names so the listener can auto-connect:
+
+```json
+{
+  "known_devices": [
+    "Streamer X",
+    "nanoPAD",
+    "APC Key 25",
+    "MIDI Fighter"
+  ]
+}
+```
+
+It will auto-select the first known device found in `mido.get_input_names()`.
 
 ---
 
@@ -65,6 +140,8 @@ Built to run persistently on Linux using a `distrobox` container or systemd user
 Run the listener:
 
 ```bash
+make listen
+# or
 python3 cli.py midi-listen
 ```
 
@@ -75,28 +152,23 @@ control_change channel=0 control=12 value=127 time=0
 → control_change:0:12:127
 ```
 
-Edit `midi_bindings.json` like this:
+Edit `./user_settings/midi_bindings.json` with your mappings.
 
-```json
-{
-  "control_change:0:12:127": ["hue-group-toggle", "Group Name"],
-  "control_change:0:13:127": ["elgato-toggle"],
-  "control_change:0:14:127": ["hue-group-color", "Group Name", "red"]
-}
-```
-
-Then run the listener:
+Then run the app to test the command:
 
 ```bash
-python3 midi_run.py --mode interactive  # supports quit()
-# or
-python3 midi_run.py --mode blocking     # efficient for background running
+make run-dev
+# or through python directly:
+
+python3 pymidi.py --mode interactive  # supports quit()
+python3 pymidi.py --mode blocking     # efficient for background running
 ```
+
 ---
 
-## 🔐 Environment Setup (`.env`)
+## 🔐 Environment Setup (.env)
 
-Create a `.env` file in the project root to store API keys and device IPs:
+Create a `.env` file in `./user_settings/` to store API keys and device IPs:
 
 ```env
 # Hue Bridge
@@ -107,15 +179,18 @@ HUE_API_KEY=your-api-key-here
 ELGATO_LIGHT_IP=192.168.1.xxx
 ```
 
-> 🧠 Use the commands `hue-discover` and `elgato-discover` to automatically generate this file!
+> 🧠 Use the commands `hue-discover` and `elgato-discover` to automatically populate this file!
 
 ---
 
-### 🛠 Auto-generate `.env`
+### 🛠 Auto-populate `.env`
 
-Run these commands to set things up (although make sure you create the .env template first):
+Run these commands to set things up (although make sure you create the `.env` template first):
 
 ```bash
+make setup
+# or through python directly, separately:
+
 python3 cli.py hue-discover
 python3 cli.py elgato-discover
 ```
@@ -126,24 +201,6 @@ These will:
 - Save IP and API key using `python-dotenv`
 
 The app will then load `.env` automatically on startup.
-
----
-
-## 🧠 MIDI Device Matching
-
-The listener uses `midi_devices.json` to match known MIDI input names:
-
-```json
-{
-  "known_devices": [
-    "Streamer X",
-    "nanoPAD",
-    "APC Key 25"
-  ]
-}
-```
-
-It will auto-select the first known device found in `mido.get_input_names()`.
 
 ---
 
@@ -195,7 +252,7 @@ After=graphical.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/distrobox enter pymidi -- /usr/bin/python3 /home/YOUR_USERNAME/.local/share/pymidi-controller/midi_run.py --mode blocking
+ExecStart=/usr/bin/distrobox enter pymidi -- /usr/bin/python3 /home/YOUR_USERNAME/.local/share/pymidi-controller/pymidi.py --mode blocking
 Restart=on-failure
 Environment=DISPLAY=:0
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
@@ -238,22 +295,28 @@ loginctl enable-linger $USER
 
 This ensures your `systemd --user` services start at system boot.
 
+---
 
 ## 📂 Project Structure
 
 ```
 pymidi-controller/
 ├── actions/
-│   ├── hue.py
-│   ├── hue_discovery.py
-│   ├── elgato.py
 │   ├── elgato_discovery.py
+│   ├── elgato.py
+│   ├── hue_discovery.py
+│   ├── hue_state.py
+│   ├── hue.py
+├── user_settings/
+│   ├── .env
+│   ├── color_cycles.json
+│   ├── midi_bindings.json
+│   ├── midi_devices.json
+├── utils/
+│   ├── color_cycle.py
 │   ├── midi_utils.py
-├── midi_run.py
+├── pymidi.py
 ├── cli.py
-├── midi_bindings.json
-├── midi_devices.json
-├── .env
 └── requirements.txt
 ```
 

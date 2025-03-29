@@ -17,5 +17,8 @@ Thumbs.db
 .env
 .env.*
 
+# State
+state/
+
 # Manually ignored files
 *.ignore

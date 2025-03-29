@@ -1,14 +1,7 @@
 from zeroconf import Zeroconf, ServiceBrowser, ServiceListener
-from dotenv import load_dotenv, set_key
-from pathlib import Path
+from config import ENV_FILE
+from dotenv import set_key
 import time
-
-# -------------------------------------------------------------------
-# 📦 Environment Setup
-# -------------------------------------------------------------------
-
-ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
-load_dotenv(ENV_PATH)
 
 # -------------------------------------------------------------------
 # 🔎 Elgato Device Discovery via mDNS
@@ -28,7 +21,7 @@ class ElgatoListener(ServiceListener):
 
             save = input("💾 Save this IP to .env as ELGATO_LIGHT_IP? [y/N] ").strip().lower()
             if save == "y":
-                set_key(str(ENV_PATH), "ELGATO_LIGHT_IP", ip)
+                set_key(str(ENV_FILE), "ELGATO_LIGHT_IP", ip)
                 print(f"✅ Saved ELGATO_LIGHT_IP={ip} to .env")
             else:
                 print("⚠️ Skipped saving IP to .env")

@@ -1,5 +1,7 @@
 import requests
 from config import HUE_BRIDGE_IP, HUE_API_KEY
+from actions.hue_state import get_last_color, set_last_color
+from utils.color_cycle import get_color_cycle
 
 # -------------------------------------------------------------------
 # 🎨 Color Presets
@@ -84,38 +86,31 @@ def toggle_group(group_name):
 
     raise ValueError(f"No group found with name: {group_name}")
 
-def toggle_group_color(group_name):
+def toggle_red_blue(group_name):
     """Toggle a group color between red or blue based on its current state."""
-    url = f"http://{HUE_BRIDGE_IP}/api/{HUE_API_KEY}/groups"
-    lights_url = f"http://{HUE_BRIDGE_IP}/api/{HUE_API_KEY}/lights"
+    last = get_last_color(group_name)
+    next_color = "blue" if last == "red" else "red"
+    set_group_color(group_name, next_color)
+    set_last_color(group_name, next_color)
+    print(f"Toggled {group_name} from {last or '[unknown]'} to {next_color}")
 
-    groups = requests.get(url).json()
-    group_id = None
+def cycle_group_color(group_name):
+    """Cycle the color of the group between the values specified in the user settings."""
+    colors = get_color_cycle(group_name)
+    if not colors:
+        raise ValueError(f"No color cycle defined for group '{group_name}'")
 
-    for gid, group in groups.items():
-        if group.get("name") == group_name:
-            group_id = gid
-            break
+    last_color = get_last_color(group_name)
+    if last_color not in colors:
+        next_index = 0
+    else:
+        next_index = (colors.index(last_color) + 1) % len(colors)
 
-    if not group_id:
-        raise ValueError(f"No group found with name: {group_name}")
+    next_color = colors[next_index]
+    set_group_color(group_name, next_color)
+    set_last_color(group_name, next_color)
 
-    # Pick the first light in the group and check its hue
-    group = groups[group_id]
-    light_ids = group.get("lights", [])
-    if not light_ids:
-        raise ValueError(f"No lights found in group: {group_name}")
-
-    first_light = requests.get(f"{lights_url}/{light_ids[0]}").json()
-    current_hue = first_light.get("state", {}).get("hue", 0)
-
-    # Hue threshold to determine current color
-    is_red = current_hue < 10000 or current_hue > 60000
-    new_color = "blue" if is_red else "red"
-
-    print(f"🎨 Current hue: {current_hue} → Switching to: {new_color}")
-    set_group_color(group_name, new_color)
-
+    print(f"Cycled color for '{group_name}': {last_color or '[unknown]'} → {next_color}")
 
 def set_group_color(group_name, hue_or_color, sat_val=254, bri_val=254):
     """Set a group's color by hue value or preset name."""

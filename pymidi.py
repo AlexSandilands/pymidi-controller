@@ -4,13 +4,10 @@ import select
 import time
 import json
 import subprocess
-from pathlib import Path
 from argparse import ArgumentParser
 from mido import open_input
-from actions.midi_utils import get_known_midi_input
-
-BINDINGS_PATH = Path(__file__).resolve().parent / "midi_bindings.json"
-CLI_PATH = Path(__file__).resolve().parent / "cli.py"
+from utils.midi_utils import get_known_midi_input
+from config import MIDI_BINDINGS_FILE, CLI_FILE
 
 def format_midi_key(msg):
     if msg.type == "control_change":
@@ -25,7 +22,7 @@ def handle_midi_message(msg, bindings):
         command = bindings[key]
         print(f"🎯 Matched {key} → Running: python3 cli.py {' '.join(command)}")
         try:
-            subprocess.Popen(["python3", str(CLI_PATH)] + command)
+            subprocess.Popen(["python3", str(CLI_FILE)] + command)
         except Exception as e:
             print(f"❌ Failed to run command: {e}")
     elif key:
@@ -64,12 +61,12 @@ def main():
     parser.add_argument("--mode", choices=["interactive", "blocking"], default="interactive", help="Listening mode")
     args = parser.parse_args()
 
-    if not BINDINGS_PATH.exists():
+    if not MIDI_BINDINGS_FILE.exists():
         print("❌ No midi_bindings.json found.")
         return
 
     try:
-        with open(BINDINGS_PATH, "r") as f:
+        with open(MIDI_BINDINGS_FILE, "r") as f:
             bindings = json.load(f)
     except json.JSONDecodeError:
         print("⚠️ midi_bindings.json is malformed.")

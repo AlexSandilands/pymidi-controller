@@ -4,10 +4,8 @@ import sys
 import select
 import time
 import json
-from pathlib import Path
 from mido import get_input_names
-
-DEVICE_CONFIG_PATH = Path(__file__).resolve().parent.parent / "midi_devices.json"
+from config import MIDI_DEVICES_FILE
 
 def get_known_midi_input():
     input_ports = get_input_names()
@@ -15,8 +13,8 @@ def get_known_midi_input():
     if not input_ports:
         return None
 
-    if DEVICE_CONFIG_PATH.exists():
-        with open(DEVICE_CONFIG_PATH, "r") as f:
+    if MIDI_DEVICES_FILE.exists():
+        with open(MIDI_DEVICES_FILE, "r") as f:
             config = json.load(f)
             known = config.get("known_devices", [])
 
