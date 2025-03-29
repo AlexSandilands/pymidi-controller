@@ -333,3 +333,10 @@ Install dependencies with:
 ```bash
 pip install -r requirements.txt
 ```
+
+## 📋 TODO
+
+- 🎚️ Adding a GUI or system tray app
+- 🐍 Publishing to PyPI
+- 🧪 Adding tests / GitHub Actions
+- 📦 Turning this into a plug-and-play installer
