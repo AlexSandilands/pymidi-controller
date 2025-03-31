@@ -10,7 +10,7 @@ setup:
 
 listen:
 	@echo "🎹 Starting interactive MIDI listener..."
-	python3 midi_listener.py
+	python3 cli.py midi-listen
 
 install:
 	@echo "📦 Installing to $(INSTALL_DIR)..."
