@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pymidi-controller"
+version = "0.1.0"
+description = "Daemon that maps MIDI events to system actions (Elgato, Hue, etc.)"
+readme = "README.md"
+license = { file = "LICENSE" }
+authors = [
+  { name = "Alex Sandilands", email = "sandilands.alex@gmail.com" }
+]
+requires-python = ">=3.7"
+dependencies = [
+  "mido>=1.2.10",
+  "python-rtmidi>=1.4.10",
+  "requests>=2.0",
+  "zeroconf>=0.40",
+  "PyYAML>=6.0"
+]
+
+[project.scripts]
+pymidi-controller = "pymidi_controller.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pymidi_controller", "pymidi_controller.*"]
+
+[tool.setuptools.package-data]
+"pymidi_controller" = [
+    "data/default_config.yaml",
+    "data/systemd/*"
+]

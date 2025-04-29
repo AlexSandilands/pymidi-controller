@@ -1,7 +1,6 @@
 import requests
 import time
-from config import ENV_FILE
-from dotenv import set_key
+from pymidi_controller.config_manager import load_config, save_config
 
 # -------------------------------------------------------------------
 # 🌐 Hue Bridge Discovery & API Key Creation
@@ -52,7 +51,7 @@ def create_user(bridge_ip, app_name="pymidi-controller"):
     raise TimeoutError("❌ Timeout waiting for link button to be pressed.")
 
 
-def save_to_env(ip, api_key):
+def save_to_config(ip, api_key):
     """
     Ask to save the discovered IP and API key into .env.
     """
@@ -61,17 +60,21 @@ def save_to_env(ip, api_key):
 
     save = input("\n💾 Save this info to your .env file? [y/N] ").strip().lower()
     if save == "y":
-        set_key(str(ENV_FILE), "HUE_BRIDGE_IP", ip)
-        set_key(str(ENV_FILE), "HUE_API_KEY", api_key)
-        print(f"✅ Saved to .env:\n  HUE_BRIDGE_IP={ip}\n  HUE_API_KEY={api_key}")
+        config = load_config()
+        config.setdefault("hue", {})
+        config["hue"]["bridge_ip"] = ip
+        config["hue"]["api_key"]   = api_key
+        save_config(config)
+        print(f"✅ Saved to config.yaml:\n  HUE_BRIDGE_IP={ip}\n  HUE_API_KEY={api_key}")
+
     else:
-        print("⚠️ Skipped saving to .env. You can manually add these later.")
+        print("⚠️ Skipped saving to config. You can manually add these later.")
 
 
 def main():
     bridge_ip = discover_bridge()
     api_key = create_user(bridge_ip)
-    save_to_env(bridge_ip, api_key)
+    save_to_config(bridge_ip, api_key)
 
 
 if __name__ == "__main__":

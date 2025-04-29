@@ -1,7 +1,7 @@
 import requests
-from config import HUE_BRIDGE_IP, HUE_API_KEY
-from actions.hue_state import get_last_color, set_last_color
-from utils.color_cycle import get_color_cycle
+from pymidi_controller.config import HUE_BRIDGE_IP, HUE_API_KEY
+from pymidi_controller.state_manager import get_last_color, set_last_color
+from pymidi_controller.utils.color_cycle import get_color_cycle
 
 # -------------------------------------------------------------------
 # 🎨 Color Presets

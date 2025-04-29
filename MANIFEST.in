@@ -1,0 +1,3 @@
+# MANIFEST.in
+include README.md LICENSE
+recursive-include pymidi_controller/data *

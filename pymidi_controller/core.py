@@ -6,8 +6,8 @@ import json
 import subprocess
 from argparse import ArgumentParser
 from mido import open_input
-from utils.midi_utils import get_known_midi_input
-from config import MIDI_BINDINGS_FILE, CLI_FILE
+from pymidi_controller.utils.midi_utils import get_known_midi_input
+from pymidi_controller.config import MIDI_BINDINGS, CLI_COMMAND
 
 def format_midi_key(msg):
     if msg.type == "control_change":
@@ -19,10 +19,10 @@ def format_midi_key(msg):
 def handle_midi_message(msg, bindings):
     key = format_midi_key(msg)
     if key and key in bindings:
-        command = bindings[key]
-        print(f"🎯 Matched {key} → Running: python3 cli.py {' '.join(command)}")
+        command = [CLI_COMMAND] + bindings[key]
+        print(f"🎯 Matched {key} → Running: {' '.join(command)}")
         try:
-            subprocess.Popen(["python3", str(CLI_FILE)] + command)
+            subprocess.Popen(command)
         except Exception as e:
             print(f"❌ Failed to run command: {e}")
     elif key:
@@ -61,15 +61,11 @@ def main():
     parser.add_argument("--mode", choices=["interactive", "blocking"], default="interactive", help="Listening mode")
     args = parser.parse_args()
 
-    if not MIDI_BINDINGS_FILE.exists():
-        print("❌ No midi_bindings.json found.")
-        return
+    bindings = MIDI_BINDINGS
 
-    try:
-        with open(MIDI_BINDINGS_FILE, "r") as f:
-            bindings = json.load(f)
-    except json.JSONDecodeError:
-        print("⚠️ midi_bindings.json is malformed.")
+    # TODO :: Better message for what to do when getting this
+    if not bindings:
+        print("❌ No midi bindings found in config.yaml")
         return
 
     device_name = get_known_midi_input()

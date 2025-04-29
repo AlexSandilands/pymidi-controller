@@ -1,5 +1,5 @@
 import requests
-from config import ELGATO_LIGHT_IP
+from pymidi_controller.config import ELGATO_LIGHT_IP
 
 # -------------------------------------------------------------------
 # 💡 Elgato Ring Light Controls

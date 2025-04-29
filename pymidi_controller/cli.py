@@ -1,10 +1,23 @@
 import argparse
-from actions import hue, hue_discovery, elgato, elgato_discovery
-from utils import midi_utils
+from pathlib import Path
+from pymidi_controller.actions import hue, hue_discovery, elgato, elgato_discovery
+from pymidi_controller.utils import midi_utils
+from pymidi_controller.config_manager import init_config
 
 def main():
     parser = argparse.ArgumentParser(description="Python MIDI :: Hue + Elgato Control CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # ----------------------------------------------------------------
+    # Initialisation
+    # ----------------------------------------------------------------
+    subparsers.add_parser("init", help="Bootstrap ~/.config/pymidi-controller/config.yaml")
+
+    # ----------------------------------------------------------------
+    # Application
+    # ----------------------------------------------------------------
+    run = subparsers.add_parser("run", help="Start the MIDI listener as a long-running process")
+    run.add_argument("--mode", choices=["interactive", "blocking"], default="blocking", help="Listener mode (blocking is best for a service)")
 
     # ----------------------------------------------------------------
     # HUE: Discovery
@@ -63,8 +76,17 @@ def main():
     # ----------------------------------------------------------------
     args = parser.parse_args()
 
+    # Initialise config
+    if args.command == "init":
+        init_config()
+
+    # Application run
+    elif args.command == "run":
+        from pymidi_controller.core import main as _run_main
+        _run_main()
+
     # Hue discovery
-    if args.command == "hue-discover":
+    elif args.command == "hue-discover":
         hue_discovery.main()
 
     # Hue group controls

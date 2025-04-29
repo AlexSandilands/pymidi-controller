@@ -5,7 +5,7 @@ import select
 import time
 import json
 from mido import get_input_names
-from config import MIDI_DEVICES_FILE
+from pymidi_controller.config import MIDI_DEVICES
 
 def get_known_midi_input():
     input_ports = get_input_names()
@@ -13,19 +13,14 @@ def get_known_midi_input():
     if not input_ports:
         return None
 
-    if MIDI_DEVICES_FILE.exists():
-        with open(MIDI_DEVICES_FILE, "r") as f:
-            config = json.load(f)
-            known = config.get("known_devices", [])
-
-            for name in known:
-                match = next((p for p in input_ports if name.lower() in p.lower()), None)
-                if match:
-                    return match
+    for name in MIDI_DEVICES:
+        match = next((p for p in input_ports if name.lower() in p.lower()), None)
+        if match:
+            return match
 
     # Fallback
-    return input_ports[0]
-
+        return input_ports[0]
+    
 
 def listen():
     device_name = get_known_midi_input()

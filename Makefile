@@ -71,6 +71,10 @@ clean:
 status:
 	@systemctl --user status pymidi.service
 
+run:
+	@echo "🚀 Running background mode (blocking)..."
+	python3 pymidi.py --mode blocking
+
 run-dev:
 	@echo "🚀 Running in dev mode (interactive)..."
 	python3 pymidi.py --mode interactive
