@@ -56,16 +56,14 @@ def run_interactive(device_name, bindings):
 
     print("👋 Listener stopped.")
 
-def main():
-    parser = ArgumentParser(description="Run the MIDI listener loop")
-    parser.add_argument("--mode", choices=["interactive", "blocking"], default="interactive", help="Listening mode")
-    args = parser.parse_args()
-
+def run(mode: str = "blocking"):
+    """
+    Entry point for the long-running MIDI listener.
+    mode: 'interactive' or 'blocking'
+    """
     bindings = MIDI_BINDINGS
-
-    # TODO :: Better message for what to do when getting this
     if not bindings:
-        print("❌ No midi bindings found in config.yaml")
+        print("❌ No MIDI bindings defined in config.yaml.")
         return
 
     device_name = get_known_midi_input()
@@ -76,10 +74,11 @@ def main():
     print(f"🎹 Listening on: {device_name}")
     print(f"📖 Loaded {len(bindings)} mappings...")
 
-    if args.mode == "blocking":
+    if mode == "blocking":
         run_blocking(device_name, bindings)
     else:
         run_interactive(device_name, bindings)
 
+
 if __name__ == "__main__":
-    main()
+    run()

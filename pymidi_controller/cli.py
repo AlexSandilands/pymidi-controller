@@ -1,11 +1,10 @@
 import argparse
-from pathlib import Path
 from pymidi_controller.actions import hue, hue_discovery, elgato, elgato_discovery
 from pymidi_controller.utils import midi_utils
 from pymidi_controller.config_manager import init_config
 
 def main():
-    parser = argparse.ArgumentParser(description="Python MIDI :: Hue + Elgato Control CLI")
+    parser = argparse.ArgumentParser(description="🎹 Python MIDI :: Controller CLI")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # ----------------------------------------------------------------
@@ -32,9 +31,9 @@ def main():
 
     group_color = subparsers.add_parser("hue-group-color", help="Set a Hue group's color")
     group_color.add_argument("group", help="Hue group name")
-    group_color.add_argument("color", help="Named color or hue value (0–65535)")
-    group_color.add_argument("--sat", type=int, default=254, help="Saturation (0–254)")
-    group_color.add_argument("--bri", type=int, default=254, help="Brightness (0–254)")
+    group_color.add_argument("color", help="Named color or hue value (0-65535)")
+    group_color.add_argument("--sat", type=int, default=254, help="Saturation (0-254)")
+    group_color.add_argument("--bri", type=int, default=254, help="Brightness (0-254)")
 
     # ----------------------------------------------------------------
     # HUE: Info
@@ -76,14 +75,15 @@ def main():
     # ----------------------------------------------------------------
     args = parser.parse_args()
 
+
     # Initialise config
     if args.command == "init":
         init_config()
 
     # Application run
     elif args.command == "run":
-        from pymidi_controller.core import main as _run_main
-        _run_main()
+        from pymidi_controller.core import run as core_run
+        core_run(mode=args.mode)
 
     # Hue discovery
     elif args.command == "hue-discover":
