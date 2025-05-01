@@ -1,5 +1,5 @@
 import sqlite3
-from pymidi_controller.config_manager import CFG_DIR, ensure_config_dir
+from pymidi_controller.utils.config_manager import CFG_DIR, ensure_config_dir
 
 # Ensure config dir exists
 ensure_config_dir()

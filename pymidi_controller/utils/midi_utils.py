@@ -3,7 +3,6 @@ import threading
 import sys
 import select
 import time
-import json
 from mido import get_input_names
 from pymidi_controller.config import MIDI_DEVICES
 

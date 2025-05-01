@@ -1,4 +1,4 @@
-from pymidi_controller.config_manager import load_config
+from pymidi_controller.utils.config_manager import load_config
 
 _cfg = load_config()
 

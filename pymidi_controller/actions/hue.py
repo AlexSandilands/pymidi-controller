@@ -1,6 +1,6 @@
 import requests
 from pymidi_controller.config import HUE_BRIDGE_IP, HUE_API_KEY
-from pymidi_controller.state_manager import get_last_color, set_last_color
+from pymidi_controller.utils.state_manager import get_last_color, set_last_color
 from pymidi_controller.utils.color_cycle import get_color_cycle
 
 # -------------------------------------------------------------------

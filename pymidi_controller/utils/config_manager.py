@@ -1,7 +1,8 @@
 import yaml
-from pathlib import Path
-from importlib import resources
+import os
 import shutil
+from importlib import resources
+from pathlib import Path
 
 XDG = Path.home() / ".config"  if "XDG_CONFIG_HOME" not in __import__("os").environ else Path(__import__("os").environ["XDG_CONFIG_HOME"])
 CFG_DIR  = XDG / "pymidi-controller"
@@ -31,7 +32,8 @@ def init_config():
 
     if not CFG_FILE.exists():
         CFG_FILE.write_text(data.read_text())
-        print(f"Created {CFG_FILE}, please edit your API keys & mappings.")
+        os.chmod(CFG_FILE, 0o600)
+        print(f"Created {CFG_FILE}, please discover your API keys & set midi mappings.")
     else:
         print(f"{CFG_FILE} already exists, skipping.")
     return

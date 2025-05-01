@@ -1,6 +1,6 @@
 import requests
 import time
-from pymidi_controller.config_manager import load_config, save_config
+from pymidi_controller.utils.config_manager import load_config, save_config
 
 # -------------------------------------------------------------------
 # 🌐 Hue Bridge Discovery & API Key Creation

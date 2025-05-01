@@ -17,9 +17,9 @@ midi:
     # The MIDI note
     control_change:0:1:127:
       # The pymidi_controller command
-      - PYMIDI_CONTROLLER COMMAND
+      - COMMAND
       # Your Hue Group Name
-      - HUE GROUP NAME
+      - "HUE GROUP NAME"
   
   # Available Colors: red, orange, yellow, green, cyan, blue, purple, pink, white
   color_cycles:

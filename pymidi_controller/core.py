@@ -2,9 +2,7 @@ import threading
 import sys
 import select
 import time
-import json
 import subprocess
-from argparse import ArgumentParser
 from mido import open_input
 from pymidi_controller.utils.midi_utils import get_known_midi_input
 from pymidi_controller.config import MIDI_BINDINGS, CLI_COMMAND
@@ -17,6 +15,7 @@ def format_midi_key(msg):
     return None
 
 def handle_midi_message(msg, bindings):
+
     key = format_midi_key(msg)
     if key and key in bindings:
         command = [CLI_COMMAND] + bindings[key]

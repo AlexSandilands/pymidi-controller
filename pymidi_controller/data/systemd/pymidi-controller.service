@@ -1,0 +1,15 @@
+[Unit]
+Description=🎹 MIDI Controller Background Service
+After=network.target
+
+[Service]
+Type=simple
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/env pymidi-controller run --mode blocking
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

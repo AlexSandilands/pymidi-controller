@@ -1,12 +1,8 @@
-[build-system]
-requires = ["setuptools>=61.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "pymidi-controller"
 version = "0.1.0"
 description = "Daemon that maps MIDI events to system actions (Elgato, Hue, etc.)"
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
 license = { file = "LICENSE" }
 authors = [
   { name = "Alex Sandilands", email = "sandilands.alex@gmail.com" }
@@ -20,8 +16,23 @@ dependencies = [
   "PyYAML>=6.0"
 ]
 
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Multimedia :: Sound/Audio :: MIDI",
+  "Topic :: Home Automation",
+  "Topic :: System :: Hardware :: Hardware Drivers",
+  "Topic :: Utilities"
+]
+
 [project.scripts]
 pymidi-controller = "pymidi_controller.cli:main"
+pymidi            = "pymidi_controller.cli:main"
+
+[project.urls]
+Homepage    = "https://github.com/AlexSandilands/pymidi-controller"
+"Bug Tracker" = "https://github.com/AlexSandilands/pymidi-controller/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
@@ -29,6 +40,6 @@ include = ["pymidi_controller", "pymidi_controller.*"]
 
 [tool.setuptools.package-data]
 "pymidi_controller" = [
-    "data/default_config.yaml",
-    "data/systemd/*"
+  "data/default_config.yaml",
+  "data/systemd/*"
 ]

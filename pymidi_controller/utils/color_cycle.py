@@ -1,4 +1,3 @@
-import json
 from pymidi_controller.config import COLOR_CYCLES
 
 # Default fallback cycle if group not defined
