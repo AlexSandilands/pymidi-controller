@@ -1,0 +1,31 @@
+hue:
+  bridge_ip:
+  api_key:
+
+elgato:
+  ip:
+
+midi:
+  devices:
+    # The names of available MIDI devices
+    - "Streamer X"
+    - "nanoPAD"
+    - "APC Key 25"
+    - "MIDI Fighter"
+  
+  bindings:
+    # The MIDI note
+    control_change:0:1:127:
+      # The pymidi_controller command
+      - COMMAND
+      # Your Hue Group Name
+      - "HUE GROUP NAME"
+  
+  # Available Colors: red, orange, yellow, green, cyan, blue, purple, pink, white
+  color_cycles:
+    # Your Hue Group Name
+    HUE GROUP NAME:
+      - red
+      - blue
+      - green
+      - purple

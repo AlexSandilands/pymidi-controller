@@ -2,12 +2,10 @@ import threading
 import sys
 import select
 import time
-import json
 import subprocess
-from argparse import ArgumentParser
 from mido import open_input
-from utils.midi_utils import get_known_midi_input
-from config import MIDI_BINDINGS_FILE, CLI_FILE
+from pymidi_controller.utils.midi_utils import get_known_midi_input
+from pymidi_controller.config import MIDI_BINDINGS, CLI_COMMAND
 
 def format_midi_key(msg):
     if msg.type == "control_change":
@@ -17,12 +15,13 @@ def format_midi_key(msg):
     return None
 
 def handle_midi_message(msg, bindings):
+
     key = format_midi_key(msg)
     if key and key in bindings:
-        command = bindings[key]
-        print(f"🎯 Matched {key} → Running: python3 cli.py {' '.join(command)}")
+        command = [CLI_COMMAND] + bindings[key]
+        print(f"🎯 Matched {key} → Running: {' '.join(command)}")
         try:
-            subprocess.Popen(["python3", str(CLI_FILE)] + command)
+            subprocess.Popen(command)
         except Exception as e:
             print(f"❌ Failed to run command: {e}")
     elif key:
@@ -56,20 +55,14 @@ def run_interactive(device_name, bindings):
 
     print("👋 Listener stopped.")
 
-def main():
-    parser = ArgumentParser(description="Run the MIDI listener loop")
-    parser.add_argument("--mode", choices=["interactive", "blocking"], default="interactive", help="Listening mode")
-    args = parser.parse_args()
-
-    if not MIDI_BINDINGS_FILE.exists():
-        print("❌ No midi_bindings.json found.")
-        return
-
-    try:
-        with open(MIDI_BINDINGS_FILE, "r") as f:
-            bindings = json.load(f)
-    except json.JSONDecodeError:
-        print("⚠️ midi_bindings.json is malformed.")
+def run(mode: str = "blocking"):
+    """
+    Entry point for the long-running MIDI listener.
+    mode: 'interactive' or 'blocking'
+    """
+    bindings = MIDI_BINDINGS
+    if not bindings:
+        print("❌ No MIDI bindings defined in config.yaml.")
         return
 
     device_name = get_known_midi_input()
@@ -80,10 +73,11 @@ def main():
     print(f"🎹 Listening on: {device_name}")
     print(f"📖 Loaded {len(bindings)} mappings...")
 
-    if args.mode == "blocking":
+    if mode == "blocking":
         run_blocking(device_name, bindings)
     else:
         run_interactive(device_name, bindings)
 
+
 if __name__ == "__main__":
-    main()
+    run()

@@ -1,6 +1,5 @@
 from zeroconf import Zeroconf, ServiceBrowser, ServiceListener
-from config import ENV_FILE
-from dotenv import set_key
+from pymidi_controller.utils.config_manager import load_config, save_config
 import time
 
 # -------------------------------------------------------------------
@@ -19,12 +18,15 @@ class ElgatoListener(ServiceListener):
 
             print(f"Found Elgato Device: {model} @ {ip}")
 
-            save = input("💾 Save this IP to .env as ELGATO_LIGHT_IP? [y/N] ").strip().lower()
+            save = input("💾 Save this IP to config as elgato ip? [y/N] ").strip().lower()
             if save == "y":
-                set_key(str(ENV_FILE), "ELGATO_LIGHT_IP", ip)
-                print(f"✅ Saved ELGATO_LIGHT_IP={ip} to .env")
+                config = load_config()
+                config.setdefault("elgato", {})
+                config["elgato"]["ip"] = ip
+                save_config(config)
+                print(f"✅ Saved elgato ip={ip} to config")
             else:
-                print("⚠️ Skipped saving IP to .env")
+                print("⚠️ Skipped saving IP to config")
 
 
 def main(timeout=5):
