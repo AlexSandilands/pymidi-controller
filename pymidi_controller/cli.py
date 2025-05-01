@@ -32,21 +32,21 @@ def main():
     # Service Commands
     # ----------------------------------------------------------------
     svc = subparsers.add_parser("service", help="Install or manage the systemd service")
+    scope_grp = svc.add_mutually_exclusive_group(required=True)
+    scope_grp.add_argument("--user",   action="store_true", help="Operate on the current user's service (~/.config/systemd/user)")
+    scope_grp.add_argument("--system", action="store_true", help="Operate on the system service (/etc/systemd/system)")
     svc_sub = svc.add_subparsers(dest="svc_cmd", required=True)
+
     # install
-    inst = svc_sub.add_parser("install", help="Install and enable the service unit")
-    inst_grp = inst.add_mutually_exclusive_group(required=True)
-    inst_grp.add_argument("--user", action="store_true", help="Install to user's systemd")
-    inst_grp.add_argument("--system", action="store_true", help="Install system-wide (requires sudo)")
+    svc_sub.add_parser("install",   help="Install and enable the service unit")
+
     # uninstall
-    uninst = svc_sub.add_parser("uninstall", help="Disable and remove the service unit")
-    uninst_grp = uninst.add_mutually_exclusive_group(required=True)
-    uninst_grp.add_argument("--user", action="store_true", help="Remove from user's systemd")
-    uninst_grp.add_argument("--system", action="store_true", help="Remove from system-wide systemd")
+    svc_sub.add_parser("uninstall", help="Disable and remove the service unit")
+
     # stop, enable, log
-    svc_sub.add_parser("stop", help="Stop the service")
+    svc_sub.add_parser("stop",   help="Stop the service")
     svc_sub.add_parser("enable", help="Enable the service")
-    svc_sub.add_parser("log", help="Show service logs")
+    svc_sub.add_parser("log",    help="Show service logs")
 
     # ----------------------------------------------------------------
     # Hue Commands
