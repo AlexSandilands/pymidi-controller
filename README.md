@@ -144,17 +144,17 @@ Use `pymidi <group> --help` for details on each context.
 
 ### Hue Commands
 
-| Command                                                    | Description                              |                         |
-| ---------------------------------------------------------- | ---------------------------------------- | ----------------------- |
-| `pymidi hue discover`                                      | Find bridge & generate API key           |                         |
-| `pymidi hue list-groups`                                   | List all groups and on/off states        |                         |
-| `pymidi hue list-lights`                                   | List all lights and their state/effect   |                         |
-| `pymidi hue list-schedules`                                | List all schedules                       |                         |
-| `pymidi hue toggle-group <group>`                          | Toggle a group on/off                    |                         |
-| `pymidi hue set-color <group> <color> [--sat N] [--bri N]` | Set group color                          |                         |
-| `pymidi hue toggle-schedule <name>`                        | Enable/disable a schedule                |                         |
-| `pymidi hue loop [--effect colorloop \| none]`             | Toggle colorloop effect                  |                         |
-| `pymidi hue cycle-color <group>`                           | Cycle group color through `color_cycles` |                         |
+| Command                                                    | Description                              |
+| ---------------------------------------------------------- | ---------------------------------------- |
+| `pymidi hue discover`                                      | Find bridge & generate API key           |
+| `pymidi hue list-groups`                                   | List all groups and on/off states        |
+| `pymidi hue list-lights`                                   | List all lights and their state/effect   |
+| `pymidi hue list-schedules`                                | List all schedules                       |
+| `pymidi hue toggle-group <group>`                          | Toggle a group on/off                    |
+| `pymidi hue set-color <group> <color> [--sat N] [--bri N]` | Set group color                          |
+| `pymidi hue toggle-schedule <name>`                        | Enable/disable a schedule                |
+| `pymidi hue loop [--effect colorloop \| none]`             | Toggle colorloop effect                  |
+| `pymidi hue cycle-color <group>`                           | Cycle group color through `color_cycles` |
 
 ### Elgato Commands
 
