@@ -49,6 +49,17 @@ def main():
     svc_sub.add_parser("log",    help="Show service logs")
 
     # ----------------------------------------------------------------
+    # Custom Function Commands
+    # ----------------------------------------------------------------
+    func = subparsers.add_parser("function", help="Custom function management")
+    func_sub = func.add_subparsers(dest="func_cmd", required=True)
+    func_sub.add_parser("list", help="List available custom functions")
+    # Run a custom function
+    run_func = func_sub.add_parser("run", help="Run a custom function")
+    run_func.add_argument("name", help="Name of the custom function to run")
+    run_func.add_argument("args", nargs=argparse.REMAINDER, help="Arguments to pass to the function")
+
+    # ----------------------------------------------------------------
     # Hue Commands
     # ----------------------------------------------------------------
     hue = subparsers.add_parser("hue", help="Hue bridge and lights management")
@@ -100,6 +111,16 @@ def main():
     if args.command == "run":
         from pymidi_controller.core import run as core_run
         core_run(mode=args.mode)
+        sys.exit(0)
+
+    if args.command == "function":
+        if args.func_cmd == "list":
+            from pymidi_controller.utils.function_manager import list_functions
+            list_functions()
+        elif args.func_cmd == "run":
+            from pymidi_controller.utils.function_manager import load_user_function
+            func = load_user_function(args.name)
+            func(*args.args)
         sys.exit(0)
 
     if args.command == "service":
