@@ -19,6 +19,7 @@ A lightweight Python CLI and background MIDI listener for controlling Philips Hu
   - [Hue Commands](#hue-commands)
   - [Elgato Commands](#elgato-commands)
   - [MIDI Commands](#midi-commands)
+  - [Custom Function Commands](#custom-function-commands)
 - [🎹 MIDI Binding Guide](#-midi-binding-guide)
 - [⚙️ Service (Optional)](#️-service-optional)
 
@@ -125,10 +126,10 @@ Use `pymidi <group> --help` for details on each context.
 
 ### Global
 
-| Command       | Description                                 |
-| ------------- | ------------------------------------------- |
-| `pymidi init` | Create default config file                  |
-| `pymidi run`  | Start the MIDI listener (`--mode blocking`) |
+| Command                                        | Description                                 |
+| ---------------------------------------------- | ------------------------------------------- |
+| `pymidi init`                                  | Create default config file and function dir |
+| `pymidi run [--mode interactive \| blocking]`  | Start the MIDI listener (`--mode blocking`) |
 
 ### Service
 
@@ -170,6 +171,13 @@ Use `pymidi <group> --help` for details on each context.
 | -------------------- | ------------------------------------------ |
 | `pymidi midi listen` | Print incoming MIDI event keys for mapping |
 
+### Custom Function Commands
+
+| Command                                        | Description                                           |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| `pymidi function list`                         | List all available custom functions                  |
+| `pymidi function run <name> [args...]`         | Run a custom function by name with optional arguments |
+
 ---
 
 ## 🎹 MIDI Binding Guide
@@ -192,6 +200,77 @@ Use `pymidi <group> --help` for details on each context.
    ```bash
    pymidi run --mode interactive
    ```
+
+---
+
+## 📜 Custom User Functions
+
+You can define your own Python functions to run on MIDI events. These live in:
+
+```
+~/.config/pymidi-controller/functions/
+```
+
+This directory is created by `pymidi init` and permissioned as `0700` (only accessible to your user).
+
+### Supported Formats
+
+#### Option 1: Single `.py` file
+
+**Structure:**
+
+```
+functions/
+└── my_function.py
+```
+
+**Content:**
+
+Note, the function must have a main() function, and this will be the entry point.
+
+```python
+def main(*args):
+    print("Hello from my_function", args)
+```
+
+#### Option 2: Package folder
+
+You can also use a subfolder with either an `__init__.py` or a `main.py`:
+These must have a main() function.
+
+**Structure A:**
+
+```
+functions/
+└── my_package/
+    └── __init__.py
+```
+
+**Structure B:**
+
+```
+functions/
+└── my_package/
+    └── main.py
+```
+
+**Content:**
+
+```python
+def main(*args):
+    print("Hello from package function", args)
+```
+
+Then bind it in your config:
+
+```yaml
+bindings:
+  control_change:0:10:127:
+    - custom
+    - my_function
+    - optional_arg1
+    - optional_arg2
+```
 
 ---
 

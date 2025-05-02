@@ -32,21 +32,32 @@ def main():
     # Service Commands
     # ----------------------------------------------------------------
     svc = subparsers.add_parser("service", help="Install or manage the systemd service")
+    scope_grp = svc.add_mutually_exclusive_group(required=True)
+    scope_grp.add_argument("--user",   action="store_true", help="Operate on the current user's service (~/.config/systemd/user)")
+    scope_grp.add_argument("--system", action="store_true", help="Operate on the system service (/etc/systemd/system)")
     svc_sub = svc.add_subparsers(dest="svc_cmd", required=True)
+
     # install
-    inst = svc_sub.add_parser("install", help="Install and enable the service unit")
-    inst_grp = inst.add_mutually_exclusive_group(required=True)
-    inst_grp.add_argument("--user", action="store_true", help="Install to user's systemd")
-    inst_grp.add_argument("--system", action="store_true", help="Install system-wide (requires sudo)")
+    svc_sub.add_parser("install",   help="Install and enable the service unit")
+
     # uninstall
-    uninst = svc_sub.add_parser("uninstall", help="Disable and remove the service unit")
-    uninst_grp = uninst.add_mutually_exclusive_group(required=True)
-    uninst_grp.add_argument("--user", action="store_true", help="Remove from user's systemd")
-    uninst_grp.add_argument("--system", action="store_true", help="Remove from system-wide systemd")
+    svc_sub.add_parser("uninstall", help="Disable and remove the service unit")
+
     # stop, enable, log
-    svc_sub.add_parser("stop", help="Stop the service")
+    svc_sub.add_parser("stop",   help="Stop the service")
     svc_sub.add_parser("enable", help="Enable the service")
-    svc_sub.add_parser("log", help="Show service logs")
+    svc_sub.add_parser("log",    help="Show service logs")
+
+    # ----------------------------------------------------------------
+    # Custom Function Commands
+    # ----------------------------------------------------------------
+    func = subparsers.add_parser("function", help="Custom function management")
+    func_sub = func.add_subparsers(dest="func_cmd", required=True)
+    func_sub.add_parser("list", help="List available custom functions")
+    # Run a custom function
+    run_func = func_sub.add_parser("run", help="Run a custom function")
+    run_func.add_argument("name", help="Name of the custom function to run")
+    run_func.add_argument("args", nargs=argparse.REMAINDER, help="Arguments to pass to the function")
 
     # ----------------------------------------------------------------
     # Hue Commands
@@ -100,6 +111,16 @@ def main():
     if args.command == "run":
         from pymidi_controller.core import run as core_run
         core_run(mode=args.mode)
+        sys.exit(0)
+
+    if args.command == "function":
+        if args.func_cmd == "list":
+            from pymidi_controller.utils.function_manager import list_functions
+            list_functions()
+        elif args.func_cmd == "run":
+            from pymidi_controller.utils.function_manager import load_user_function
+            func = load_user_function(args.name)
+            func(*args.args)
         sys.exit(0)
 
     if args.command == "service":
