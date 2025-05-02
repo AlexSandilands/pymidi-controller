@@ -1,7 +1,7 @@
 [project]
 name = "pymidi-controller"
-version = "0.1.0"
-description = "Daemon that maps MIDI events to system actions (Elgato, Hue, etc.)"
+version = "0.2.0"
+description = "Daemon that maps MIDI events to system actions (Elgato, Hue, or custom functions)."
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "MIT"
 license-files = ["LICENSE"]
