@@ -97,12 +97,11 @@ def enable(scope: ServiceScope = ServiceScope.USER):
 
     :param scope: ServiceScope.USER or ServiceScope.SYSTEM
     """
-    ctl = ["systemctl"]
+    cmd = ["systemctl"]
     if scope == ServiceScope.USER:
-        ctl.append("--user")
-    # Disable first so links from older units (e.g. default.target.wants) are removed
-    subprocess.run(ctl + ["disable", "pymidi-controller.service"], check=False)
-    subprocess.run(ctl + ["enable", "pymidi-controller.service"], check=True)
+        cmd.insert(1, "--user")
+    cmd.extend(["enable", "pymidi-controller.service"])
+    subprocess.run(cmd, check=True)
     print("✅ Service enabled.")
 
 

@@ -284,7 +284,9 @@ pymidi service install --user
 
 The user service starts with your graphical session (`graphical-session.target`), after the desktop compositor is up. It does not pull that target in itself, so it can't make other autostart apps start early.
 
-> **Upgrading from 0.3.0 or earlier?** Rerun `pymidi service install --user` once. It replaces the old unit and removes its stale `default.target` link.
+If your window manager doesn't start `graphical-session.target` (Plasma and GNOME do; some minimal setups such as i3, sway or Hyprland don't unless configured to), the service won't start at login. Start the target from your session startup, e.g. `systemctl --user start graphical-session.target`.
+
+> **Upgrading from 0.3.0 or earlier?** Rerun `pymidi service install --user` (or `--system` for a system-wide install) once. It replaces the old unit and removes its stale `default.target` link. `pymidi service enable` alone doesn't refresh the unit file.
 
 Logs:
 
