@@ -288,13 +288,32 @@ The user service starts with your graphical session (`graphical-session.target`)
 
 If your window manager doesn't start `graphical-session.target` (Plasma and GNOME do; some minimal setups such as i3, sway or Hyprland don't unless configured to), the service won't start at login. Start the target from your session startup, e.g. `systemctl --user start graphical-session.target`.
 
-> **Upgrading from 0.3.0 or earlier?** Rerun `pymidi service --user install` (or `pymidi service --system install` for a system-wide install) once. It replaces the old unit and removes its stale `default.target` link. `pymidi service --user enable` alone doesn't refresh the unit file.
+> **Upgrading from 0.3.0 or earlier?** Rerun `pymidi service --user install` (or the `--system` command below for a system-wide install) once. It replaces the old unit and removes its stale `default.target` link. `pymidi service --user enable` alone doesn't refresh the unit file.
 
 Logs:
 
 ```bash
 pymidi service --user log
 ```
+
+### System-wide install (headless)
+
+The user service only starts with a graphical session. On a headless machine (a Raspberry Pi or server driving Hue or Elgato lights, say), install it system-wide so it starts at boot:
+
+```bash
+sudo "$(command -v pymidi)" service --system install
+```
+
+Run it from your own account with `sudo`; it doesn't work from a root shell. `sudo` resets `PATH`, so pass the full path to `pymidi` as shown. The service runs as the user who ran `sudo`, not as root, so it reads that user's config from `~/.config/pymidi-controller`. It also joins the `audio` group so it can reach the ALSA sequencer without a login session. The unit records the Python interpreter that ran the install, so reinstall after moving or recreating a venv.
+
+Logs and removal:
+
+```bash
+pymidi service --system log
+sudo "$(command -v pymidi)" service --system uninstall
+```
+
+> **Already have a `--system` install from 0.3.x?** Rerun the install command above once. The old unit ran as root and looked for `pymidi-controller` on a `PATH` that never included `~/.local/bin`, so it was unlikely to have worked; the new install replaces it.
 
 ---
 
