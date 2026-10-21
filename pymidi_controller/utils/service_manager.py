@@ -20,8 +20,8 @@ class ServiceScope(Enum):
 
 SYSTEM_UNIT_DIR = Path("/etc/systemd/system")
 
-# Conservative: what useradd accepts by default, which is all systemd needs for User=
-_USERNAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]*\$?")
+# Conservative, but allows realm-style names (alice@corp.com); excludes % and whitespace
+_USERNAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_.@-]*\$?")
 
 
 def _exec_start_arg(path: str) -> str:

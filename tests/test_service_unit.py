@@ -87,7 +87,7 @@ def test_unsupported_user_names_are_rejected(user):
         render_system_unit(user, PY)
 
 
-@pytest.mark.parametrize("user", ["alice", "pi", "_svc", "first.last", "name-1", "machine$"])
+@pytest.mark.parametrize("user", ["alice", "pi", "_svc", "first.last", "name-1", "machine$", "alice@corp.com"])
 def test_ordinary_user_names_are_accepted(user):
     assert f"\nUser={user}\n" in render_system_unit(user, PY)
 
