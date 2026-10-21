@@ -1,6 +1,7 @@
 import grp
 import os
 import pwd
+import re
 import shutil
 import subprocess
 import sys
@@ -17,24 +18,42 @@ class ServiceScope(Enum):
     SYSTEM = auto()
 
 
+SYSTEM_UNIT_DIR = Path("/etc/systemd/system")
+
+# Conservative: what useradd accepts by default, which is all systemd needs for User=
+_USERNAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*\$?$")
+
+
 def _exec_start_arg(path: str) -> str:
     """Escape a path for use as the executable in a unit's ExecStart=."""
-    path = path.replace("%", "%%")
-    if any(c.isspace() or c in '"\\' for c in path):
+    if any(ord(c) < 32 or ord(c) == 127 for c in path):
+        raise ValueError(f"Interpreter path contains control characters: {path!r}")
+    # % is a unit specifier and $ starts variable expansion, even inside quotes
+    path = path.replace("%", "%%").replace("$", "$$")
+    if any(c.isspace() or c in "\"'\\" for c in path):
         path = '"' + path.replace("\\", "\\\\").replace('"', '\\"') + '"'
     return path
 
 
-def render_system_unit(user: str, python: str) -> str:
+def render_system_unit(user: str, python: str, audio_group: bool = True) -> str:
     """
     Render the system-wide unit for ``user``, running ``python -m pymidi_controller``.
 
     The absolute interpreter path means the unit doesn't depend on PATH, which the
     system manager doesn't set up for a user (pipx, venv and pip --user installs).
+    ``audio_group`` adds SupplementaryGroups=audio; leave it off where the group
+    doesn't exist, as systemd refuses to start a unit naming a missing group.
     """
+    if not _USERNAME_RE.match(user):
+        raise ValueError(f"Unsupported user name for a systemd unit: {user!r}")
     template = (resources.files("pymidi_controller") / "data/systemd/pymidi-controller.system.service").read_text(encoding="utf-8")
     exec_start = f"{_exec_start_arg(python)} -m pymidi_controller run --mode blocking"
-    return template.replace("@USER@", user).replace("@EXEC_START@", exec_start)
+    groups = "SupplementaryGroups=audio\n" if audio_group else ""
+    return (
+        template.replace("@USER@", user)
+        .replace("@SUPPLEMENTARY_GROUPS@\n", groups)
+        .replace("@EXEC_START@", exec_start)
+    )
 
 
 def _require_root(action: str):
@@ -62,11 +81,19 @@ def _invoking_user() -> str:
     return user
 
 
+def _audio_group_exists() -> bool:
+    try:
+        grp.getgrnam("audio")
+    except KeyError:
+        return False
+    return True
+
+
 def _warn_audio_group(user: str):
     try:
         audio = grp.getgrnam("audio")
     except KeyError:
-        print("⚠️  No 'audio' group on this system; the unit's SupplementaryGroups=audio will make the service fail to start.")
+        print("⚠️  No 'audio' group on this system, so the unit omits SupplementaryGroups=audio. The service may not be able to open /dev/snd/seq.")
         return
     gids = os.getgrouplist(user, pwd.getpwnam(user).pw_gid)
     if audio.gr_gid not in gids:
@@ -87,9 +114,12 @@ def install(scope: ServiceScope):
     elif scope == ServiceScope.SYSTEM:
         _require_root("install")
         user = _invoking_user()
-        target_dir = Path("/etc/systemd/system")
+        target_dir = SYSTEM_UNIT_DIR
         ctl = ["systemctl"]
-        unit_text = render_system_unit(user, sys.executable)
+        try:
+            unit_text = render_system_unit(user, sys.executable, audio_group=_audio_group_exists())
+        except ValueError as e:
+            sys.exit(f"⚠️  {e}")
     else:
         print("⚠️  Invalid scope for install.")
         return
@@ -110,7 +140,9 @@ def install(scope: ServiceScope):
     subprocess.run(ctl + ["daemon-reload"], check=True)
     # Drop links from older units (e.g. default.target.wants) before enabling
     subprocess.run(ctl + ["disable", "pymidi-controller.service"], check=False)
-    subprocess.run(ctl + ["enable", "--now", "pymidi-controller.service"], check=True)
+    subprocess.run(ctl + ["enable", "pymidi-controller.service"], check=True)
+    # restart (not enable --now) so a reinstall replaces an already-running old process
+    subprocess.run(ctl + ["restart", "pymidi-controller.service"], check=True)
     print("✅ Service enabled and started.")
 
 
@@ -125,7 +157,7 @@ def uninstall(scope: ServiceScope):
         ctl = ["systemctl", "--user"]
     elif scope == ServiceScope.SYSTEM:
         _require_root("uninstall")
-        target_dir = Path("/etc/systemd/system")
+        target_dir = SYSTEM_UNIT_DIR
         ctl = ["systemctl"]
     else:
         print("⚠️  Invalid scope for uninstall.")

@@ -6,7 +6,7 @@ Wants=sound.target
 [Service]
 Type=simple
 User=@USER@
-SupplementaryGroups=audio
+@SUPPLEMENTARY_GROUPS@
 ExecStart=@EXEC_START@
 Restart=always
 RestartSec=5

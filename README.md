@@ -304,7 +304,9 @@ The user service only starts with a graphical session. On a headless machine (a 
 sudo "$(command -v pymidi)" service --system install
 ```
 
-Run it from your own account with `sudo`; it doesn't work from a root shell. `sudo` resets `PATH`, so pass the full path to `pymidi` as shown. The service runs as the user who ran `sudo`, not as root, so it reads that user's config from `~/.config/pymidi-controller`. It also joins the `audio` group so it can reach the ALSA sequencer without a login session. The unit records the Python interpreter that ran the install, so reinstall after moving or recreating a venv.
+Start it through `sudo` from your own account: the service runs as the user named in `SUDO_USER`, which `sudo` sets (it also survives `sudo -i` and `sudo -s`). A root login, `su` or `doas` doesn't set it, so the command refuses to install rather than guess. `sudo` resets `PATH`, so pass the full path to `pymidi` as shown. The service reads that user's config from `~/.config/pymidi-controller`, and joins the `audio` group (when the system has one) so it can reach the ALSA sequencer without a login session. The unit records the Python interpreter that ran the install, so reinstall after moving or recreating a venv.
+
+A system service has no desktop session (no `DISPLAY`, `WAYLAND_DISPLAY` or session D-Bus), so bindings that launch desktop programs or use `notify-send` won't work. Use the `--user` service for those; Hue and Elgato actions over the network are fine.
 
 Logs and removal:
 
@@ -313,7 +315,7 @@ pymidi service --system log
 sudo "$(command -v pymidi)" service --system uninstall
 ```
 
-> **Already have a `--system` install from 0.3.x?** Rerun the install command above once. The old unit ran as root and looked for `pymidi-controller` on a `PATH` that never included `~/.local/bin`, so it was unlikely to have worked; the new install replaces it.
+> **Already have a `--system` install from 0.3.x?** Rerun the install command above once. The old unit ran as root and looked for `pymidi-controller` on a `PATH` that never included `~/.local/bin`, so it was unlikely to have worked; rerunning the install replaces the unit and restarts the service.
 
 ---
 
