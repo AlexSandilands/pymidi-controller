@@ -5,8 +5,9 @@ Wants=sound.target
 
 [Service]
 Type=simple
-Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
-ExecStart=/usr/bin/env pymidi-controller run --mode blocking
+User=@USER@
+@SUPPLEMENTARY_GROUPS@
+ExecStart=@EXEC_START@
 Restart=always
 RestartSec=5
 StandardOutput=journal

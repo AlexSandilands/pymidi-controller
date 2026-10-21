@@ -1,6 +1,6 @@
 [project]
 name = "pymidi-controller"
-version = "0.3.2"
+version = "0.4.0"
 description = "Daemon that maps MIDI events to system actions (Elgato, Hue, or custom functions)."
 readme = { file = "README.md", content-type = "text/markdown" }
 license = "MIT"
@@ -25,6 +25,9 @@ classifiers = [
   "Topic :: System :: Hardware :: Hardware Drivers",
   "Topic :: Utilities"
 ]
+
+[project.optional-dependencies]
+dev = ["pytest"]
 
 [project.scripts]
 pymidi-controller = "pymidi_controller.cli:main"
