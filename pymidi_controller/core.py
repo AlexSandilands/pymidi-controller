@@ -18,7 +18,7 @@ def handle_midi_message(msg, bindings):
 
     key = format_midi_key(msg)
     if key and key in bindings:
-        command = [CLI_COMMAND] + bindings[key]
+        command = CLI_COMMAND + bindings[key]
         print(f"🎯 Matched {key} → Running: {' '.join(command)}")
         try:
             subprocess.Popen(command)
@@ -60,6 +60,9 @@ def run(mode: str = "blocking"):
     Entry point for the long-running MIDI listener.
     mode: 'interactive' or 'blocking'
     """
+    # Under systemd stdout is a pipe, so flush per line to reach the journal
+    sys.stdout.reconfigure(line_buffering=True)
+
     bindings = MIDI_BINDINGS
     if not bindings:
         print("❌ No MIDI bindings defined in config.yaml.")
