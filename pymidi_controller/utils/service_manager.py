@@ -22,20 +22,24 @@ def install(scope: ServiceScope):
     if scope == ServiceScope.USER:
         target_dir = Path.home() / ".config/systemd/user"
         ctl = ["systemctl", "--user"]
+        src_name = "pymidi-controller.service"
     elif scope == ServiceScope.SYSTEM:
         target_dir = Path("/etc/systemd/system")
         ctl = ["systemctl"]
+        src_name = "pymidi-controller.system.service"
     else:
         print("⚠️  Invalid scope for install.")
         return
 
     target_dir.mkdir(parents=True, exist_ok=True)
-    src = resources.files("pymidi_controller") / "data/systemd/pymidi-controller.service"
+    src = resources.files("pymidi_controller") / "data/systemd" / src_name
     dst = target_dir / "pymidi-controller.service"
     shutil.copy(src, dst)
     print(f"✔️  Installed service unit to {dst}")
 
     subprocess.run(ctl + ["daemon-reload"], check=True)
+    # Drop links from older units (e.g. default.target.wants) before enabling
+    subprocess.run(ctl + ["disable", "pymidi-controller.service"], check=False)
     subprocess.run(ctl + ["enable", "--now", "pymidi-controller.service"], check=True)
     print("✅ Service enabled and started.")
 
