@@ -28,14 +28,15 @@ def _exec_start_arg(path: str) -> str:
     """
     Escape a path for use as the executable in a unit's ExecStart=.
 
-    systemd can't express every path there: it applies neither $ expansion nor
-    quote handling consistently to the executable, so those are refused.
+    systemd rejects quotes and backslashes in the executable word whatever the
+    quoting, so those paths are refused. A literal $ is fine there ($$ is only
+    collapsed in arguments).
     """
-    bad = [c for c in path if ord(c) < 32 or ord(c) == 127 or c in "$'\"\\"]
+    bad = [c for c in path if ord(c) < 32 or ord(c) == 127 or c in "'\"\\"]
     if bad:
         raise ValueError(
             f"Can't write a systemd unit for the interpreter at {path!r}: its path contains "
-            "a control, quote, backslash or $ character. Install pymidi from a path without those."
+            "a control, quote or backslash character. Install pymidi from a path without those."
         )
     path = path.replace("%", "%%")  # % is a unit specifier
     if any(c.isspace() for c in path):

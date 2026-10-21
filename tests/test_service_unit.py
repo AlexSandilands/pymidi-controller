@@ -47,6 +47,7 @@ def test_no_home_specifier_or_path_override():
         ("/home/a b/python", '"/home/a b/python"'),
         ("/home/50%/python", "/home/50%%/python"),
         ("/home/a b/50%/python", '"/home/a b/50%%/python"'),
+        ("/home/a$b/python", "/home/a$b/python"),
     ],
 )
 def test_interpreter_path_is_escaped(path, expected):
@@ -55,7 +56,7 @@ def test_interpreter_path_is_escaped(path, expected):
 
 
 @pytest.mark.skipif(shutil.which("systemd-analyze") is None, reason="systemd-analyze not available")
-@pytest.mark.parametrize("dirname", ["plain", "with space", "with%percent", "with space%and percent"])
+@pytest.mark.parametrize("dirname", ["plain", "with space", "with%percent", "with space%and percent", "with$dollar", "with $dollar space"])
 def test_systemd_resolves_the_rendered_interpreter(tmp_path, dirname):
     interpreter = tmp_path / dirname / "python"
     interpreter.parent.mkdir()
@@ -68,7 +69,7 @@ def test_systemd_resolves_the_rendered_interpreter(tmp_path, dirname):
     assert "quoting" not in (out.stdout + out.stderr).lower()
 
 
-@pytest.mark.parametrize("path", ["/tmp/a$b/python", "/tmp/o'x/python", '/tmp/q"x/python', "/tmp/b\\s/python"])
+@pytest.mark.parametrize("path", ["/tmp/o'x/python", '/tmp/q"x/python', "/tmp/b\\s/python"])
 def test_paths_systemd_cant_express_are_rejected(path):
     with pytest.raises(ValueError):
         render_system_unit("alice", path)
