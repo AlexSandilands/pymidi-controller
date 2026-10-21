@@ -143,7 +143,7 @@ Use `pymidi <group> --help` for details on each context.
 | `pymidi service --user\|--system enable`      | Enable service                      |
 | `pymidi service --user\|--system log`         | Tail service logs                   |
 
-Every service subcommand requires a scope flag before the subcommand. Choose either `--user` or `--system` where the table shows `--user|--system`, for example `pymidi service --user stop`.
+Every service subcommand requires a scope flag before the subcommand. Choose either `--user` or `--system` where the table shows `--user|--system`, for example `pymidi service --user stop`. `--system install` and `--system uninstall` must be run through `sudo`; see [System-wide install](#system-wide-install-headless).
 
 ### Hue Commands
 

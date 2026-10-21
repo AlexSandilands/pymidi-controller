@@ -21,17 +21,25 @@ class ServiceScope(Enum):
 SYSTEM_UNIT_DIR = Path("/etc/systemd/system")
 
 # Conservative: what useradd accepts by default, which is all systemd needs for User=
-_USERNAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_.-]*\$?$")
+_USERNAME_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_.-]*\$?")
 
 
 def _exec_start_arg(path: str) -> str:
-    """Escape a path for use as the executable in a unit's ExecStart=."""
-    if any(ord(c) < 32 or ord(c) == 127 for c in path):
-        raise ValueError(f"Interpreter path contains control characters: {path!r}")
-    # % is a unit specifier and $ starts variable expansion, even inside quotes
-    path = path.replace("%", "%%").replace("$", "$$")
-    if any(c.isspace() or c in "\"'\\" for c in path):
-        path = '"' + path.replace("\\", "\\\\").replace('"', '\\"') + '"'
+    """
+    Escape a path for use as the executable in a unit's ExecStart=.
+
+    systemd can't express every path there: it applies neither $ expansion nor
+    quote handling consistently to the executable, so those are refused.
+    """
+    bad = [c for c in path if ord(c) < 32 or ord(c) == 127 or c in "$'\"\\"]
+    if bad:
+        raise ValueError(
+            f"Can't write a systemd unit for the interpreter at {path!r}: its path contains "
+            "a control, quote, backslash or $ character. Install pymidi from a path without those."
+        )
+    path = path.replace("%", "%%")  # % is a unit specifier
+    if any(c.isspace() for c in path):
+        path = '"' + path + '"'
     return path
 
 
@@ -44,7 +52,7 @@ def render_system_unit(user: str, python: str, audio_group: bool = True) -> str:
     ``audio_group`` adds SupplementaryGroups=audio; leave it off where the group
     doesn't exist, as systemd refuses to start a unit naming a missing group.
     """
-    if not _USERNAME_RE.match(user):
+    if not _USERNAME_RE.fullmatch(user):
         raise ValueError(f"Unsupported user name for a systemd unit: {user!r}")
     template = (resources.files("pymidi_controller") / "data/systemd/pymidi-controller.system.service").read_text(encoding="utf-8")
     exec_start = f"{_exec_start_arg(python)} -m pymidi_controller run --mode blocking"

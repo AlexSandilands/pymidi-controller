@@ -46,11 +46,7 @@ def test_no_home_specifier_or_path_override():
     [
         ("/home/a b/python", '"/home/a b/python"'),
         ("/home/50%/python", "/home/50%%/python"),
-        ("/home/a$b/python", "/home/a$$b/python"),
-        ("/home/o'brien/python", '"/home/o\'brien/python"'),
-        ('/home/q"x/python', '"/home/q\\"x/python"'),
-        ("/home/b\\s/python", '"/home/b\\\\s/python"'),
-        ("/home/a b/$x'y/python", '"/home/a b/$$x\'y/python"'),
+        ("/home/a b/50%/python", '"/home/a b/50%%/python"'),
     ],
 )
 def test_interpreter_path_is_escaped(path, expected):
@@ -59,12 +55,23 @@ def test_interpreter_path_is_escaped(path, expected):
 
 
 @pytest.mark.skipif(shutil.which("systemd-analyze") is None, reason="systemd-analyze not available")
-@pytest.mark.parametrize("path", ["/home/o'brien/python", "/home/a b/python", "/home/a$b/python"])
-def test_awkward_paths_parse_in_systemd(tmp_path, path):
+@pytest.mark.parametrize("dirname", ["plain", "with space", "with%percent", "with space%and percent"])
+def test_systemd_resolves_the_rendered_interpreter(tmp_path, dirname):
+    interpreter = tmp_path / dirname / "python"
+    interpreter.parent.mkdir()
+    interpreter.write_text("#!/bin/sh\n")
+    interpreter.chmod(0o755)
     unit_file = tmp_path / "pymidi-controller.service"
-    unit_file.write_text(render_system_unit("alice", path))
+    unit_file.write_text(render_system_unit("alice", str(interpreter)))
     out = subprocess.run(["systemd-analyze", "verify", str(unit_file)], capture_output=True, text=True)
+    assert "not executable" not in out.stdout + out.stderr
     assert "quoting" not in (out.stdout + out.stderr).lower()
+
+
+@pytest.mark.parametrize("path", ["/tmp/a$b/python", "/tmp/o'x/python", '/tmp/q"x/python', "/tmp/b\\s/python"])
+def test_paths_systemd_cant_express_are_rejected(path):
+    with pytest.raises(ValueError):
+        render_system_unit("alice", path)
 
 
 @pytest.mark.parametrize("path", ["/tmp/a\nExecStartPre=/bin/evil", "/tmp/a\rb"])
@@ -73,7 +80,7 @@ def test_control_characters_in_interpreter_path_are_rejected(path):
         render_system_unit("alice", path)
 
 
-@pytest.mark.parametrize("user", ["", "a b", "a\nUser=root", "50%", "-lead", "a/b"])
+@pytest.mark.parametrize("user", ["", "a b", "alice\n", "a\nUser=root", "50%", "-lead", "a/b"])
 def test_unsupported_user_names_are_rejected(user):
     with pytest.raises(ValueError):
         render_system_unit(user, PY)
