@@ -133,15 +133,17 @@ Use `pymidi <group> --help` for details on each context.
 
 ### Service
 
-| Command                             | Description                         |
-| ----------------------------------- | ----------------------------------- |
-| `pymidi service install --user`     | Install & start as a user service   |
-| `pymidi service install --system`   | Install & start system-wide service |
-| `pymidi service uninstall --user`   | Stop & remove user service          |
-| `pymidi service uninstall --system` | Stop & remove system service        |
-| `pymidi service stop`               | Stop the running service            |
-| `pymidi service enable`             | Enable service (user scope)         |
-| `pymidi service log`                | Tail service logs                   |
+| Command                                      | Description                         |
+| -------------------------------------------- | ----------------------------------- |
+| `pymidi service --user install`               | Install & start as a user service   |
+| `pymidi service --system install`             | Install & start system-wide service |
+| `pymidi service --user uninstall`             | Stop & remove user service          |
+| `pymidi service --system uninstall`           | Stop & remove system service        |
+| `pymidi service --user\|--system stop`        | Stop the running service            |
+| `pymidi service --user\|--system enable`      | Enable service                      |
+| `pymidi service --user\|--system log`         | Tail service logs                   |
+
+Every service subcommand requires a scope flag before the subcommand. Choose either `--user` or `--system` where the table shows `--user|--system`, for example `pymidi service --user stop`.
 
 ### Hue Commands
 
@@ -279,19 +281,19 @@ bindings:
 To run automatically at login:
 
 ```bash
-pymidi service install --user
+pymidi service --user install
 ```
 
 The user service starts with your graphical session (`graphical-session.target`), after the desktop compositor is up. It does not pull that target in itself, so it can't make other autostart apps start early.
 
 If your window manager doesn't start `graphical-session.target` (Plasma and GNOME do; some minimal setups such as i3, sway or Hyprland don't unless configured to), the service won't start at login. Start the target from your session startup, e.g. `systemctl --user start graphical-session.target`.
 
-> **Upgrading from 0.3.0 or earlier?** Rerun `pymidi service install --user` (or `--system` for a system-wide install) once. It replaces the old unit and removes its stale `default.target` link. `pymidi service enable` alone doesn't refresh the unit file.
+> **Upgrading from 0.3.0 or earlier?** Rerun `pymidi service --user install` (or `pymidi service --system install` for a system-wide install) once. It replaces the old unit and removes its stale `default.target` link. `pymidi service --user enable` alone doesn't refresh the unit file.
 
 Logs:
 
 ```bash
-pymidi service log
+pymidi service --user log
 ```
 
 ---
